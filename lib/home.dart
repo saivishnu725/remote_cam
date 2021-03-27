@@ -39,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 200.0,
                   width: 200.0,
                   decoration: BoxDecoration(
+                    // color: Colors.green,
                     image: DecorationImage(
                       image: FileImage(_image),
                     ),
@@ -53,26 +54,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
         ),
       ),
-      floatingActionButton: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Row(
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  chooseImage(ImageSource.gallery);
-                },
-                child: Text("Gal"),
-              ),
-              FloatingActionButton(
-                onPressed: () {
-                  chooseImage(ImageSource.camera);
-                },
-                child: Text("Cam"),
-              ),
-            ],
+      floatingActionButton: Row(
+        children: [
+          SizedBox(
+            width: 200.0,
+            // height: 200.0,
           ),
-        ),
+          FloatingActionButton(
+            onPressed: () {
+              chooseImage(ImageSource.gallery);
+            },
+            child: Text("Gal"),
+          ),
+          SizedBox(
+            width: 20.0,
+            // height: 200.0,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              chooseImage(ImageSource.camera);
+            },
+            child: Text("Cam"),
+          ),
+        ],
       ),
     );
   }
