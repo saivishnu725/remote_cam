@@ -4,6 +4,7 @@ import 'screens/home.dart';
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
+    title: "Camera client",
     home: HomeScreen(),
   ));
 }

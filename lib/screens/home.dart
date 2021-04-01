@@ -1,6 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_for_web/image_picker_for_web.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
+import 'package:intl/intl.dart';
+
+// void main() => runApp(MaterialApp(home: HomeScreen()));  //Uncomment this line to make this file standalone.. :)
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
@@ -11,12 +17,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   File _image;
-  final picker = ImagePicker();
+  final picker = ImagePickerPlugin();
+
   chooseImage(ImageSource imageSource) async {
-    final pickedImage = await picker.getImage(source: imageSource);
+    final pickedImage = await picker.pickImage(source: imageSource);
     setState(() {
       _image = File(pickedImage.path);
     });
+  }
+
+  Future uploadImageToFirebase(BuildContext context) async {
+    String fileName =
+        basename(DateFormat("yyyy-MM-dd hh:mm").format(DateTime.now()));
+    // var putImage = await
+    await FirebaseStorage.instance
+        .ref()
+        .child('images/$fileName')
+        .putFile(_image)
+        .then((value) => print("Done: $value"));
   }
 
   @override
