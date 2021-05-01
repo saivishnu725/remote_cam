@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as fs;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path/path.dart';
 import 'package:intl/intl.dart';
 
@@ -25,6 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _initialised = false;
   bool _error = false;
   String fileName;
+  fs.FirebaseStorage storage = fs.FirebaseStorage.instance;
+  Future<String> futureUrl;
+  String url;
   chooseImage(ImageSource imageSource) async {
     final pickedImage = await picker.pickImage(source: imageSource);
     setState(() {
@@ -35,11 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future getName(BuildContext context) async {
     fileName = basename(DateFormat("yyyy-MM-dd hh:mm").format(DateTime.now()));
     // fileName.replaceAll(RegExp(r' +'), '-');
-    for (int i = 0; i <= fileName.length; i++) {
-      if (fileName[i] == ' ') {
-        fileName[i].replaceAll(RegExp(r' + '), '-');
-      }
-    }
     debugPrint(fileName);
   }
 
@@ -60,7 +58,17 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-// TODO : UploadFile to firestore 
+
+// TODO : Check if this works :)
+  Future<void> uploadFile(String filePath) async {
+    File file = File(filePath);
+    await storage.ref('images/$fileName.png').putFile(file);
+    setState(() {
+      futureUrl = storage.ref('images/$fileName.png').getDownloadURL();
+      futureUrl.then((value) => url = value);
+    });
+  }
+
   @override
   void initState() {
     initialiseFirebase();
@@ -108,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? Container(
                   height: 200.0,
                   width: 200.0,
-                  child: Text("${_image.path} \n $fileName"),
+                  child: Image.network(url), //TODO : Check this as well.
                 )
               : Container(
                   width: 200.0,
@@ -129,6 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               chooseImage(ImageSource.gallery);
               getName(context);
+              uploadFile(_image.path);
             },
             child: Text("Gal"),
           ),
@@ -140,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               chooseImage(ImageSource.camera);
               getName(context);
+              uploadFile(_image.path);
             },
             child: Text("Cam"),
           ),
