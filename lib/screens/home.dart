@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
+import 'package:firebase_core_web/firebase_core_web.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +21,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   File _image;
   final picker = ImagePickerPlugin();
+  bool _initialised = false;
+  bool _error = false;
 
   chooseImage(ImageSource imageSource) async {
     final pickedImage = await picker.pickImage(source: imageSource);
@@ -29,16 +34,53 @@ class _HomeScreenState extends State<HomeScreen> {
   Future uploadImageToFirebase(BuildContext context) async {
     String fileName =
         basename(DateFormat("yyyy-MM-dd hh:mm").format(DateTime.now()));
-    // var putImage = await
-    await FirebaseStorage.instance
-        .ref()
-        .child('images/$fileName')
-        .putFile(_image)
-        .then((value) => print("Done: $value"));
+    debugPrint(fileName);
+  }
+
+  void initialiseFirebase() async {
+    try {
+      if (kIsWeb) {
+        await FirebaseCoreWeb().initializeApp();
+      } else {
+        await Firebase.initializeApp();
+      }
+      setState(() {
+        _initialised = true;
+      });
+    } catch (e) {
+      _error = true;
+    }
+  }
+
+  @override
+  void initState() {
+    initialiseFirebase();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_error) {
+      return Scaffold(
+        body: Center(
+          child: Text(
+            "Got a error!!",
+            style: TextStyle(
+              color: Colors.red[800],
+              fontSize: 35,
+            ),
+          ),
+        ),
+      );
+    }
+    if (!_initialised) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Loading please wait."),
+        ),
+        body: CircularProgressIndicator(),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
