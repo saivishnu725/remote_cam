@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -33,7 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future getName(BuildContext context) async {
     fileName = basename(DateFormat("yyyy-MM-dd hh:mm").format(DateTime.now()));
-    fileName.replaceAll(RegExp(r' +'), '-');
+    // fileName.replaceAll(RegExp(r' +'), '-');
+    for (int i = 0; i <= fileName.length; i++) {
+      if (fileName[i] == ' ') {
+        fileName[i].replaceAll(RegExp(r' + '), '-');
+      }
+    }
     debugPrint(fileName);
   }
 
@@ -54,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-
+// TODO : UploadFile to firestore 
   @override
   void initState() {
     initialiseFirebase();
