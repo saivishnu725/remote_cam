@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path/path.dart';
 import 'package:intl/intl.dart';
 
@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final picker = ImagePickerPlugin();
   bool _initialised = false;
   bool _error = false;
-
+  String fileName;
   chooseImage(ImageSource imageSource) async {
     final pickedImage = await picker.pickImage(source: imageSource);
     setState(() {
@@ -31,9 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future uploadImageToFirebase(BuildContext context) async {
-    String fileName =
-        basename(DateFormat("yyyy-MM-dd hh:mm").format(DateTime.now()));
+  Future getName(BuildContext context) async {
+    fileName = basename(DateFormat("yyyy-MM-dd hh:mm").format(DateTime.now()));
+    fileName.replaceAll(RegExp(r' +'), '-');
     debugPrint(fileName);
   }
 
@@ -48,7 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _initialised = true;
       });
     } catch (e) {
-      _error = true;
+      setState(() {
+        debugPrint(e);
+        _error = true;
+      });
     }
   }
 
@@ -74,12 +77,13 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     if (!_initialised) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("Loading please wait."),
-        ),
-        body: CircularProgressIndicator(),
-      );
+      debugPrint("$_initialised");
+      // return Scaffold(
+      //   appBar: AppBar(
+      //     title: Text("Loading please wait."),
+      //   ),
+      //   body: CircularProgressIndicator(),
+      // );
     }
     return Scaffold(
       appBar: AppBar(
@@ -98,12 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? Container(
                   height: 200.0,
                   width: 200.0,
-                  decoration: BoxDecoration(
-                    // color: Colors.green,
-                    image: DecorationImage(
-                      image: FileImage(_image),
-                    ),
-                  ),
+                  child: Text("${_image.path} \n $fileName"),
                 )
               : Container(
                   width: 200.0,
@@ -123,6 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
           FloatingActionButton(
             onPressed: () {
               chooseImage(ImageSource.gallery);
+              getName(context);
             },
             child: Text("Gal"),
           ),
@@ -133,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
           FloatingActionButton(
             onPressed: () {
               chooseImage(ImageSource.camera);
+              getName(context);
             },
             child: Text("Cam"),
           ),
